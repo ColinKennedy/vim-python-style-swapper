@@ -15,7 +15,7 @@ nnoremap <silent> <Plug>(python-style-swapper-mapping) :PythonFunctionStyleToggl
 
 " Create default mappings if they are not defined
 if !hasmapto('<Plug>(python-style-swapper-mapping)')
-    nmap <leader>ta <Plug>(python-style-swapper-mapping)
+    nmap <leader>sa <Plug>(python-style-swapper-mapping)
 endif
 
 
