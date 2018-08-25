@@ -7,6 +7,7 @@
 # TODO : Make the functions used from this module a common plug-in (so it can be re-used)
 from python_function_expander.trimmer import parser
 from astroid import as_string
+import astroid
 
 
 class MultiLineCallVisitor(as_string.AsStringVisitor):
@@ -79,14 +80,17 @@ def make_single_line(code, row):
     '''
     lines = code.split('\n')
 
-    call = parser.get_nearest_call(code, row)
+    node = parser.get_nearest_call(code, row)
 
-    indent = get_indent(lines[call.fromlineno - 1])
-    output_lines = call.as_string().split('\n')
+    if isinstance(node.parent, astroid.Assign):
+        node = node.parent
+
+    indent = get_indent(lines[node.fromlineno - 1])
+    output_lines = node.as_string().split('\n')
     output_lines = ['{indent}{text}'.format(indent=indent, text=text) for text in output_lines]
 
-    start = call.fromlineno - 1
-    end = parser.get_tolineno(call, lines)
+    start = node.fromlineno - 1
+    end = parser.get_tolineno(node, lines)
     lines[start:end] = output_lines
 
     code = '\n'.join(lines)
@@ -107,18 +111,21 @@ def make_multi_line(code, row):
     '''
     lines = code.split('\n')
 
-    call = parser.get_nearest_call(code, row)
+    node = parser.get_nearest_call(code, row)
+
+    if isinstance(node.parent, astroid.Assign):
+        node = node.parent
 
     # TODO : Indent must be retrieved from the user's config
     visitor = MultiLineCallVisitor(indent='    ')
-    output = visitor(call)
+    output = visitor(node)
 
-    indent = get_indent(lines[call.fromlineno - 1])
+    indent = get_indent(lines[node.fromlineno - 1])
     output_lines = output.split('\n')
     output_lines = ['{indent}{text}'.format(indent=indent, text=text) for text in output_lines]
 
-    start = call.fromlineno - 1
-    end = parser.get_tolineno(call, lines)
+    start = node.fromlineno - 1
+    end = parser.get_tolineno(node, lines)
     lines[start:end] = output_lines
 
     code = '\n'.join(lines)
