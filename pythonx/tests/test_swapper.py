@@ -169,6 +169,114 @@ class MultiLineSwap(_Common):
         self._compare(expected, code)
 
 
+class SingleLineAssignmentSwap(_Common):
+
+    @staticmethod
+    def _compare_function(code, row):
+        return swapper.make_multi_line(code, row)
+
+    def test_best_case(self):
+        code = textwrap.dedent(
+            '''
+            obj = foo(bar, thing=None, an|o|ther={'asdfd': [('asdfasfd', 'tt'), 8]})
+            '''
+        )
+
+        expected = textwrap.dedent(
+            '''
+            obj = foo(
+                bar,
+                thing=None,
+                another={'asdfd': [('asdfasfd', 'tt'), 8]},
+            )
+            '''
+        )
+
+        self._compare(expected, code)
+
+    def test_weird_whitespace(self):
+        code = textwrap.dedent(
+            '''
+            obj = foo(   bar,     thing|=|None,     another={'asdfd': [('asdfasfd', 'tt'), 8]})
+            '''
+        )
+
+        expected = textwrap.dedent(
+            '''
+            obj = foo(
+                bar,
+                thing=None,
+                another={'asdfd': [('asdfasfd', 'tt'), 8]},
+            )
+            '''
+        )
+
+        self._compare(expected, code)
+
+
+class MultiLineAssignmentSwap(_Common):
+
+    def test_best_case(self):
+        code = textwrap.dedent(
+            '''
+            obj = foo(
+                thin|g|,
+                bar,
+                fizz,
+                another,
+            )
+            '''
+        )
+
+        expected = textwrap.dedent(
+            '''
+            obj = foo(thing, bar, fizz, another)
+            '''
+        )
+
+        self._compare(expected, code)
+
+    def test_another_case(self):
+        code = textwrap.dedent(
+            '''
+            obj = foo(
+                thing,
+                bar,
+                f|i|zz,
+                another
+            )
+            '''
+        )
+
+        expected = textwrap.dedent(
+            '''
+            obj = foo(thing, bar, fizz, another)
+            '''
+        )
+
+        self._compare(expected, code)
+
+    def test_mixed_indentation(self):
+        code = textwrap.dedent(
+            '''
+            obj = foo(
+                thing,
+                    bar,
+            f|i|zz,
+                        another
+            )
+            '''
+        )
+
+        expected = textwrap.dedent(
+            '''
+            obj = foo(thing, bar, fizz, another)
+            '''
+        )
+
+        self._compare(expected, code)
+
+
 class ToggleStyle(_Common):
 
     @staticmethod

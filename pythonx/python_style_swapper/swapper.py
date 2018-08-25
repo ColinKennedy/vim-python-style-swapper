@@ -134,9 +134,24 @@ def make_multi_line(code, row):
 
 
 def toggle(code, row):
+    '''Change a single-line call into a multiline call or vice-versa.
+
+    Args:
+        code (str): The code to change.
+        row (int): A 0-based line number value to search for a call.
+
+    Returns:
+        tuple[str, <astroid.Call> or NoneType]:
+            The changed code and the found astroid node, if any.
+            If no astroid node is found, the original code is returned, untouched.
+
+    '''
     lines = code.split('\n')
 
     call = parser.get_nearest_call(code, row)
+
+    if not call:
+        return (code, None)
 
     if call.fromlineno == parser.get_tolineno(call, lines):
         output = make_multi_line(code, row)
