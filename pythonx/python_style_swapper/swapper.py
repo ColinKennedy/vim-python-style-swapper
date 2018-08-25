@@ -62,6 +62,10 @@ class MultiLineCallVisitor(as_string.AsStringVisitor):
         return '{expression}({args})'.format(expression=expression, args=',\n'.join(args))
 
 
+def get_indent(text):
+    return text[:len(text) - len(text.lstrip())]
+
+
 def make_single_line(code, row):
     '''Convert the multi-line called object in some row into a single-line.
 
@@ -77,8 +81,14 @@ def make_single_line(code, row):
 
     call = parser.get_nearest_call(code, row)
 
+    indent = get_indent(lines[call.fromlineno - 1])
+    output_lines = call.as_string().split('\n')
+    output_lines = ['{indent}{text}'.format(indent=indent, text=text) for text in output_lines]
+
+    start = call.fromlineno - 1
     end = parser.get_tolineno(call, lines)
-    lines[call.fromlineno - 1:end] = call.as_string().split('\n')
+    lines[start:end] = output_lines
+
     code = '\n'.join(lines)
 
     return code
@@ -103,8 +113,14 @@ def make_multi_line(code, row):
     visitor = MultiLineCallVisitor(indent='    ')
     output = visitor(call)
 
+    indent = get_indent(lines[call.fromlineno - 1])
+    output_lines = output.split('\n')
+    output_lines = ['{indent}{text}'.format(indent=indent, text=text) for text in output_lines]
+
+    start = call.fromlineno - 1
     end = parser.get_tolineno(call, lines)
-    lines[call.fromlineno - 1:end] = output.split('\n')
+    lines[start:end] = output_lines
+
     code = '\n'.join(lines)
 
     return code
@@ -120,10 +136,7 @@ def toggle(code, row):
     else:
         output = make_single_line(code, row)
 
-    start = call.fromlineno - 2
-    end = parser.get_tolineno(call, lines) + 1
-
-    lines[start:end] = output.split('\n')
+    lines = output.split('\n')
     code = '\n'.join(lines)
 
     return (code, call)

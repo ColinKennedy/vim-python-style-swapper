@@ -26,7 +26,6 @@ def _set_cursor(cursor):
 
 def toggle():
     code = '\n'.join(vim.current.window.buffer)
-    raise ValueError(code)
 
     (row, _) = vim.current.window.cursor
 
@@ -36,6 +35,11 @@ def toggle():
         return
 
     lines = output.splitlines()
+
+    # TODO : Consider making this better by NOT replacing the entire buffer and
+    # instead just replacing the part of the buffer where the function text was
+    # changed. Or not! https://ubiquity.acm.org/article.cfm?id=1513451
+    #
     vim.current.window.buffer[:] = lines
 
     # TODO : Figure out a way to convert the cursor
