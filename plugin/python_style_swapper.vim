@@ -21,15 +21,13 @@ endif
 
 function! s:PythonFunctionStyleToggle()
 python << EOF
-# from python_style_swapper import swapper
-# # TODO : Remove this reload
-# reload(swapper)
-# 
-# code = vim.current.window.buffer[:]
-# (row, _) = vim.current.window.cursor
-# row += 1
-# 
-# swapper.toggle(code, row)
+from python_style_swapper import swapper
+from python_style_swapper import vim_swapper
+# TODO : Remove this reload
+reload(swapper)
+reload(vim_swapper)
+
+vim_swapper.toggle()
 EOF
 endfunction
 

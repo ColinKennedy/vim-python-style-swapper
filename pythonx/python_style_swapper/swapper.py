@@ -76,8 +76,8 @@ def make_single_line(code, row):
     lines = code.split('\n')
 
     call = parser.get_nearest_call(code, row)
-    end = parser.get_tolineno(call, lines)
 
+    end = parser.get_tolineno(call, lines)
     lines[call.fromlineno - 1:end] = call.as_string().split('\n')
     code = '\n'.join(lines)
 
@@ -111,10 +111,19 @@ def make_multi_line(code, row):
 
 
 def toggle(code, row):
-    call = parser.get_nearest_call(code, row)
     lines = code.split('\n')
 
+    call = parser.get_nearest_call(code, row)
+
     if call.fromlineno == parser.get_tolineno(call, lines):
-        make_multi_line(code, row)
+        output = make_multi_line(code, row)
     else:
-        make_single_line(code, row)
+        output = make_single_line(code, row)
+
+    start = call.fromlineno - 2
+    end = parser.get_tolineno(call, lines) + 1
+
+    lines[start:end] = output.split('\n')
+    code = '\n'.join(lines)
+
+    return (code, call)

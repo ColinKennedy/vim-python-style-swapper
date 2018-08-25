@@ -48,9 +48,12 @@ class _Common(unittest.TestCase):
         code, (row, _) = self._acquire_cursor(code)
         output = self._compare_function(code, row)
 
-        # for index, (char1, char2) in enumerate(zip(expected, output)):
-        #     if char1 != char2:
-        #         raise ValueError((char1, expected[:index + 1], output[:index + 1]))
+        # raise ValueError(output)
+        # raise ValueError(expected)
+
+        for index, (char1, char2) in enumerate(zip(expected, output)):
+            if char1 != char2:
+                raise ValueError((char1, expected[:index + 1], output[:index + 1]))
 
         # raise ValueError(output)
         # raise ValueError(expected)
@@ -140,6 +143,53 @@ class MultiLineSwap(_Common):
         expected = textwrap.dedent(
             '''
             foo(thing, bar, fizz, another)
+            '''
+        )
+
+        self._compare(expected, code)
+
+    def test_mixed_indentation(self):
+        code = textwrap.dedent(
+            '''
+            foo(
+                thing,
+                    bar,
+            f|i|zz,
+                        another
+            )
+            '''
+        )
+
+        expected = textwrap.dedent(
+            '''
+            foo(thing, bar, fizz, another)
+            '''
+        )
+
+        self._compare(expected, code)
+
+
+class ToggleStyle(_Common):
+
+    @staticmethod
+    def _compare_function(code, row):
+        toggled_code = swapper.toggle(code, row)[0]
+        return toggled_code
+
+    def test_weird_whitespace(self):
+        code = textwrap.dedent(
+            '''
+            foo(   bar,     thing|=|None,     another={'asdfd': [('asdfasfd', 'tt'), 8]})
+            '''
+        )
+
+        expected = textwrap.dedent(
+            '''
+            foo(
+                bar,
+                thing=None,
+                another={'asdfd': [('asdfasfd', 'tt'), 8]},
+            )
             '''
         )
 
