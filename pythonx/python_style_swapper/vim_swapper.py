@@ -42,9 +42,8 @@ def toggle():
     #
     vim.current.window.buffer[:] = lines
 
-    # TODO : Figure out a way to convert the cursor
-    # first_non_whitespace_character_column = \
-    #     len(trimmed_lines[call.fromlineno - 1]) - \
-    #     len(trimmed_lines[call.fromlineno - 1].lstrip())
+    first_non_whitespace_character_column = \
+        len(lines[call.fromlineno - 1]) - \
+        len(lines[call.fromlineno - 1].lstrip())
 
-    # _set_cursor((call.fromlineno - 1, first_non_whitespace_character_column))
+    _set_cursor((call.fromlineno - 1, first_non_whitespace_character_column))
