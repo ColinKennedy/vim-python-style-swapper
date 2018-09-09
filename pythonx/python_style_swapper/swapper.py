@@ -4,7 +4,7 @@
 '''A set of classes and functions needed to parse and print Python callable objects.'''
 
 # IMPORT THIRD-PARTY LIBRARIES
-# TODO : Make the functions used from this module a common plug-in (so it can be re-used)
+# TODO : Make the functions used from the `parser` module into a common plug-in (so it can be re-used)
 from python_function_expander.trimmer import parser
 from astroid import as_string
 import astroid
@@ -12,7 +12,15 @@ import astroid
 
 class MultiLineCallVisitor(as_string.AsStringVisitor):
 
-    '''A visitor that re-prints <astroid.Call> nodes in a multi-line style.'''
+    '''A visitor that re-prints <astroid.Call> nodes in a multi-line style.
+
+    Attributes:
+        _single_line_exceptions (tuple[str]):
+            Any functions, by-name, which should not allowed to be made multi-line.
+
+    '''
+
+    _single_line_exceptions = ('super', )
 
     def _format_args(self, args):
         '''Change the given arguments into "multi-line" style arguments.
@@ -25,19 +33,32 @@ class MultiLineCallVisitor(as_string.AsStringVisitor):
             list[str]: The multi-line representation of `args`.
 
         '''
+        if not args:
+            return ''
+
+        # `args` has a chance of being a tuple. We need indexing so convert it to a list
         args = list(args)
 
-        try:
-            args[0] = '\n{indent}'.format(indent=self.indent) + args[0]
-        except IndexError:
-            return args
-
-
+        # Add proper indentation to every arg
+        args[0] = '\n{indent}'.format(indent=self.indent) + args[0]
         args = [args[0]] + ['{indent}{name}'.format(indent=self.indent, name=name) for name in args[1:]]
 
+        # Add commas to every arg, including the last arg
         args[-1] += ',\n'
+        args = ',\n'.join(args)
 
         return args
+
+    def _make_multi_line(self, node):
+        '''list[str]: Add newline and extra space to each arg and kwarg.'''
+        args = [arg.accept(self) for arg in node.args]
+        keywords = []
+
+        if node.keywords:
+            keywords = [kwarg.accept(self) for kwarg in node.keywords]
+
+        args.extend(keywords)
+        return self._format_args(args)
 
     def visit_call(self, node):
         '''Expand an <astroid.Call> object into a valid Python string.
@@ -50,17 +71,20 @@ class MultiLineCallVisitor(as_string.AsStringVisitor):
 
         '''
         expression = node.func.accept(self)
-        args = [arg.accept(self) for arg in node.args]
-        if node.keywords:
-            keywords = [kwarg.accept(self) for kwarg in node.keywords]
-        else:
-            keywords = []
 
-        args.extend(keywords)
+        try:
+            if node.func.name in self._single_line_exceptions:
+                return node.as_string()
+        except AttributeError:
+            # This only happens if node is a <astroid.Attribute>
+            # An attribute will never be in the list of function exceptions so
+            # just ignore it.
+            #
+            pass
 
-        args = self._format_args(args)
+        args = self._make_multi_line(node)
 
-        return '{expression}({args})'.format(expression=expression, args=',\n'.join(args))
+        return '{expression}({args})'.format(expression=expression, args=args)
 
 
 def get_indent(text):
