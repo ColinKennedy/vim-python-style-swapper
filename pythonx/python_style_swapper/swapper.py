@@ -102,13 +102,12 @@ def make_single_line(code, row):
         str: The modified code.
 
     '''
-    lines = code.split('\n')
-
     node = parser.get_nearest_call(code, row)
 
     if isinstance(node.parent, astroid.Assign):
         node = node.parent
 
+    lines = code.split('\n')
     indent = get_indent(lines[node.fromlineno - 1])
     output_lines = node.as_string().split('\n')
     output_lines = ['{indent}{text}'.format(indent=indent, text=text) for text in output_lines]
@@ -133,8 +132,6 @@ def make_multi_line(code, row):
         str: The modified code.
 
     '''
-    lines = code.split('\n')
-
     node = parser.get_nearest_call(code, row)
 
     if isinstance(node.parent, astroid.Assign):
@@ -144,6 +141,7 @@ def make_multi_line(code, row):
     visitor = MultiLineCallVisitor(indent='    ')
     output = visitor(node)
 
+    lines = code.split('\n')
     indent = get_indent(lines[node.fromlineno - 1])
     output_lines = output.split('\n')
     output_lines = ['{indent}{text}'.format(indent=indent, text=text) for text in output_lines]
@@ -170,14 +168,15 @@ def toggle(code, row):
             If no astroid node is found, the original code is returned, untouched.
 
     '''
-    lines = code.split('\n')
-
     call = parser.get_nearest_call(code, row)
 
     if not call:
         return (code, None)
 
-    if call.fromlineno == parser.get_tolineno(call, lines):
+    lines = code.split('\n')
+    is_single_line = call.fromlineno == parser.get_tolineno(call, lines)
+
+    if is_single_line:
         output = make_multi_line(code, row)
     else:
         output = make_single_line(code, row)
