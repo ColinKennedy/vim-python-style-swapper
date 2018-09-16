@@ -10,13 +10,16 @@ endif
 command! -nargs=0 PythonFunctionStyleToggle call s:PythonFunctionStyleToggle()
 
 " Plugin mappings
-nnoremap <silent> <Plug>(python-style-swapper-mapping) :PythonFunctionStyleToggle<CR>
+try
+    " If tpope/vim-repeat(https://github.com/tpope/vim-repeat) is installed, use it
+    nnoremap <silent> <Plug>(python-style-swapper-mapping) :PythonFunctionStyleToggle<CR>:call repeat#set("\<Plug>(python-style-swapper-mapping)")<CR>
+catch /\VUnknown function/
+    " The plugin wasn't installed so just use a normal mapping
+    nnoremap <silent> <Plug>(python-style-swapper-mapping) :PythonFunctionStyleToggle<CR>
+endtry
 
 
-" Create default mappings if they are not defined
-if !hasmapto('<Plug>(python-style-swapper-mapping)')
-    nmap <leader>sa <Plug>(python-style-swapper-mapping)
-endif
+nmap <leader>sa <Plug>(python-style-swapper-mapping)
 
 
 function! s:PythonFunctionStyleToggle()
