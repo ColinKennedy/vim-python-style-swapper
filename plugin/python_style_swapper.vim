@@ -9,6 +9,10 @@ endif
 
 command! -nargs=0 PythonFunctionStyleToggle call s:PythonFunctionStyleToggle()
 
+if !hasmapto('<Plug>(vim-python-style-swapper-mapping)')
+    nmap <leader>sa <Plug>(vim-python-style-swapper-mapping)
+endif
+
 " Plugin mappings
 try
     " If [tpope/vim-repeat](https://github.com/tpope/vim-repeat) is installed, use it
@@ -17,9 +21,6 @@ catch /\VUnknown function/
     " The plugin wasn't installed so just use a normal mapping
     nnoremap <silent> <Plug>(vim-python-style-swapper-mapping) :PythonFunctionStyleToggle<CR>
 endtry
-
-
-nmap <leader>sa <Plug>(vim-python-style-swapper-mapping)
 
 
 function! s:PythonFunctionStyleToggle()
