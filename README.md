@@ -78,8 +78,15 @@ Move the files to their respective folders in your `~/.vim` directory
 Customizations
 --------------
 
+Repeatable Mappings
+-------------------
+
 If you install [tpope/vim-repeat](https://github.com/tpope/vim-repeat) then
-this plugin's mappings become repeatable. it's not require though.
+this plugin's mappings become repeatable. it's not required though.
+
+
+Mapping Customization
+---------------------
 
 Also, `<leader>sa` is the default mapping for vim-python-style-swapper but it
 can be overwritten. Just add this line to your .vimrc:
@@ -88,3 +95,16 @@ can be overwritten. Just add this line to your .vimrc:
 Plug 'ColinKennedy/vim-python-style-swapper'  " or whatever plugin installation lines you use
 nmap <leader>ga <Plug>(vim-python-style-swapper-mapping)
 ```
+
+Indentation
+-----------
+
+When vim-python-style-swapper changes a single line to a multi-line call, it
+uses spaces `"    "` to add indentation. If you want to change indentation
+then use `g:vim_python_style_swapper_indent`
+
+3 Spaces:
+`let g:vim_python_style_swapper_indent = "   "`
+
+Tabs:
+`let g:vim_python_style_swapper_indent = "\t"`
