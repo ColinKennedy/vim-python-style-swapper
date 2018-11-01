@@ -4,10 +4,21 @@
 '''A set of classes and functions needed to parse and print Python callable objects.'''
 
 # IMPORT THIRD-PARTY LIBRARIES
-# TODO : Make the functions used from the `parser` module into a common plug-in (so it can be re-used)
-from python_function_expander.trimmer import parser
-from astroid import as_string
-import astroid
+try:
+    from astroid import as_string
+    import astroid
+except ImportError:
+    import sys
+    import os
+
+    _ROOT = os.path.dirname(os.path.realpath(__file__))
+    sys.path.append(os.path.join(_ROOT, 'vendors'))
+
+    from astroid import as_string
+    import astroid
+
+# IMPORT LOCAL LIBRARIES
+from .trimmer import parser
 
 
 class MultiLineCallVisitor(as_string.AsStringVisitor):
@@ -137,7 +148,7 @@ def make_multi_line(code, row):
     if isinstance(node.parent, astroid.Assign):
         node = node.parent
 
-    # TODO : Indent must be retrieved from the user's config
+    # TODO : Indent should be retrieved from the user's config
     visitor = MultiLineCallVisitor(indent='    ')
     output = visitor(node)
 
