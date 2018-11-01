@@ -6,6 +6,7 @@ import vim
 
 # IMPORT LOCAL LIBRARIES
 from . import swapper
+from . import config
 
 
 def _to_vim(cursor):
@@ -22,6 +23,24 @@ def _set_cursor(cursor):
     #            I copied the code from this repository, to avoid the extra dependency
     #
     vim.current.window.cursor = _to_vim(cursor)
+
+
+def init():
+    '''Get the user's preferred indentation, if they have it defined.'''
+    try:
+        indent = vim.eval('g:vim_python_style_swapper_indent')
+    except Exception:
+        pass
+    else:
+        config.register_indent_preference(indent)
+        return
+
+    if vim.eval('&expandtab'):
+        default_indent = '    '
+    else:
+        default_indent = '\t'
+
+    config.register_indent_preference(default_indent)
 
 
 def toggle():

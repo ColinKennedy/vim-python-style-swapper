@@ -19,6 +19,7 @@ except ImportError:
 
 # IMPORT LOCAL LIBRARIES
 from .trimmer import parser
+from . import config
 
 
 class MultiLineCallVisitor(as_string.AsStringVisitor):
@@ -148,8 +149,7 @@ def make_multi_line(code, row):
     if isinstance(node.parent, astroid.Assign):
         node = node.parent
 
-    # TODO : Indent should be retrieved from the user's config
-    visitor = MultiLineCallVisitor(indent='    ')
+    visitor = MultiLineCallVisitor(indent=config.get_indent_preference())
     output = visitor(node)
 
     lines = code.split('\n')

@@ -23,13 +23,17 @@ catch /\VUnknown function/
 endtry
 
 
-function! s:PythonFunctionStyleToggle()
-python << EOF
-from python_style_swapper import swapper
+pythonx << EOF
 from python_style_swapper import vim_swapper
-# TODO : Remove this reload
-reload(swapper)
-reload(vim_swapper)
+
+vim_swapper.init()
+EOF
+
+
+function! s:PythonFunctionStyleToggle()
+pythonx << EOF
+from python_style_swapper import vim_swapper
+from python_style_swapper import swapper
 
 vim_swapper.toggle()
 EOF
