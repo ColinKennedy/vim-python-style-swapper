@@ -30,10 +30,22 @@ to type `<leader>sa`. See [Customizations](#Customizations) if you'd like
 to change the default mapping.
 
 
+Requirements
+------------
+
+This plugin uses [astroid](https://pypi.org/project/astroid).
+vim-python-style-swapper comes with its own copy of astroid but it's
+recommended to install it yourself.
+
+```python
+pip install astroid
+```
+
+
 Installation
 ------------
 
-Install everything in the "Requirements" section and then install
+Install everything in the [Requirements](#Requirements) section and then install
 vim-textobj-block-party using a plugin manager or manually.
 
 
