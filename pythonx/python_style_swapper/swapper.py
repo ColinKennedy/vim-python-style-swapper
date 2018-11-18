@@ -61,9 +61,10 @@ class MultiLineCallVisitor(as_string.AsStringVisitor):
 
         return args
 
-    def _make_multi_line(self, node):
+    def _get_args(self, node):
         '''list[str]: Add newline and extra space to each arg and kwarg.'''
         args = [arg.accept(self) for arg in node.args]
+
         keywords = []
 
         if node.keywords:
@@ -94,13 +95,38 @@ class MultiLineCallVisitor(as_string.AsStringVisitor):
             #
             pass
 
-        args = self._make_multi_line(node)
+        args = self._get_args(node)
 
         return '{expression}({args})'.format(expression=expression, args=args)
 
 
 def get_indent(text):
     return text[:len(text) - len(text.lstrip())]
+
+
+def format_lines(code, node, visited_lines):
+    '''Replace code with text that has been run through a visitor.
+
+    Args:
+        code (str): The original code to replace.
+        node (`astroid.Node`): The callable object that will be replaced.
+        visited_lines (iter[str]): The lines to replace `code` with.
+
+    Returns:
+        list[str]:
+            The code, now with `visited_lines` in-place of the original text.
+
+    '''
+    lines = code.split('\n')
+    indent = get_indent(lines[node.fromlineno - 1])
+    output_lines = ['{indent}{text}'.format(indent=indent, text=text)
+                    for text in visited_lines]
+
+    start = node.fromlineno - 1
+    end = parser.get_tolineno(node, lines)
+    lines[start:end] = output_lines
+
+    return lines
 
 
 def make_single_line(code, row):
@@ -119,15 +145,7 @@ def make_single_line(code, row):
     if isinstance(node.parent, astroid.Assign):
         node = node.parent
 
-    lines = code.split('\n')
-    indent = get_indent(lines[node.fromlineno - 1])
-    output_lines = node.as_string().split('\n')
-    output_lines = ['{indent}{text}'.format(indent=indent, text=text) for text in output_lines]
-
-    start = node.fromlineno - 1
-    end = parser.get_tolineno(node, lines)
-    lines[start:end] = output_lines
-
+    lines = format_lines(code, node, node.as_string().split('\n'))
     code = '\n'.join(lines)
 
     return code
@@ -152,15 +170,7 @@ def make_multi_line(code, row):
     visitor = MultiLineCallVisitor(indent=config.get_indent_preference())
     output = visitor(node)
 
-    lines = code.split('\n')
-    indent = get_indent(lines[node.fromlineno - 1])
-    output_lines = output.split('\n')
-    output_lines = ['{indent}{text}'.format(indent=indent, text=text) for text in output_lines]
-
-    start = node.fromlineno - 1
-    end = parser.get_tolineno(node, lines)
-    lines[start:end] = output_lines
-
+    lines = format_lines(code, node, output.split('\n'))
     code = '\n'.join(lines)
 
     return code
