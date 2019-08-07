@@ -1,3 +1,12 @@
+Note
+----
+
+This repository is deprecated in-favor of https://github.com/FooSoft/vim-argwrap. 
+It's an overall better tool and works with all filetypes, not just Python.
+
+Summary
+-------
+
 A Python tool that converts multi-line and single-line callable objects.
 
 For example, convert this line:
